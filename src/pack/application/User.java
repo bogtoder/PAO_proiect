@@ -1,11 +1,18 @@
 package pack.application;
 
+import pack.databaseConnection.DatabaseConnection;
+import pack.dbPersistence.AtbPersist;
+import pack.dbPersistence.AvPersist;
+import pack.dbPersistence.DbPersist;
+import pack.dbPersistence.NavPersist;
 import pack.entities.vehicule.*;
 
 import pack.loc.Locatie;
+import pack.persistence.AuditService;
 import pack.persistence.FileService;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.*;
 
 
@@ -21,11 +28,12 @@ public class User {
     private List<Vehicul> vehiculePersoane = new LinkedList<>();
 
     private static FileService file_service = null;
-
     private String VEHICULE_PATH = "src\\pack\\csvFiles\\vehicule.csv";
 
 
-    public User() throws IOException {
+
+
+    public User() throws IOException, SQLException {
         this.vehiculeMarfa = new LinkedList<>();
         this.vehiculePersoane = new LinkedList<>();
 
@@ -34,17 +42,17 @@ public class User {
         this.listaVehicule = file_service.copiazaVehicule(VEHICULE_PATH); // copiez ce vehicule am salvate deja
 
         // reconstruiesc celelalte 2 liste dupa serialNumber, n-are rost sa le memorez separat
-        for(Vehicul veh : listaVehicule) {
-            if(veh.getSerialNumber() < 5000) {
-                vehiculePersoane.add(veh);
-            }
-            else {
-                vehiculeMarfa.add(veh);
-            }
-        }
-
-        file_service.audit("start_main_service");
-        file_service.audit("copiat_vehicule");
+//        for(Vehicul veh : listaVehicule) {
+//            if(veh.getSerialNumber() < 5000) {
+//                vehiculePersoane.add(veh);
+//            }
+//            else {
+//                vehiculeMarfa.add(veh);
+//            }
+//        }
+//
+//        file_service.audit("start_main_service");
+//        file_service.audit("copiat_vehicule");
     }
 
 
@@ -54,32 +62,44 @@ public class User {
             Autobuz atb = addAutobuz();
             listaVehicule.add(atb);
             vehiculePersoane.add(atb);
-            file_service.scrieAutobuz(atb);
-            file_service.audit("adaug_autobuz");
+
+            file_service.scrieAutobuz(atb);  // in csv
+            AtbPersist.getInstance().insertAtb(atb);  // in BD
+
+            AuditService.getInstance().audit("adaug_autobuz");
         }
         else if(tip == 2) {
             // este nava
             Nava nv = addNava();
             listaVehicule.add(nv);
             vehiculePersoane.add(nv);
-            file_service.scrieNava(nv);
-            file_service.audit("adaug_nava");
+
+            file_service.scrieNava(nv);  // in .csv
+            NavPersist.getInstance().insertNav(nv);
+
+            AuditService.getInstance().audit("adaug_nava");
         }
         else if(tip == 3) {
             // este avion
             Avion av = addAvion();
             listaVehicule.add(av);
             vehiculeMarfa.add(av);
-            file_service.scrieAvion(av);
-            file_service.audit("adaug_avion");
+
+            file_service.scrieAvion(av);  //in csv
+            AvPersist.getInstance().insertAv(av);
+
+            AuditService.getInstance().audit("adaug_avion");
         }
         else if(tip == 4) {
             // este duba
             Duba db = addDuba();
             listaVehicule.add(db);
             vehiculeMarfa.add(db);
-            file_service.scrieDuba(db);
-            file_service.audit("adaug_duba");
+
+            file_service.scrieDuba(db); // in csv
+            DbPersist.getInstance().insertDb(db);
+
+            AuditService.getInstance().audit("adaug_duba");
         }
     }                               // 1
 

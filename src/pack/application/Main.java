@@ -1,15 +1,16 @@
 package pack.application;
 
+
 import java.io.IOException;
 import java.util.*;
+import java.sql.*;
 
 public class Main {
 
     // bun deci bafta cu proiectu
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, SQLException, ClassNotFoundException {
 
-        System.out.println();
 
         User app = new User();
         Scanner cin = new Scanner(System.in);
